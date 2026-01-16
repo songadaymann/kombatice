@@ -1,0 +1,34 @@
+[gd_resource type="SpriteFrames" load_steps=7 format=3 uid="uid://cgjn4awrnb277"]
+
+[ext_resource type="Texture2D" uid="uid://4hrm7cbru4yn" path="res://assets/ice/ice1.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://c0wpoyoy1pg5q" path="res://assets/ice/ice2.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://du52ppocqtx4g" path="res://assets/ice/ice3.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://cag3kbxbao76h" path="res://assets/ice/ice4.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://fdj4j7n6xqqo" path="res://assets/ice/ice5.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://bowv5cs1bsguu" path="res://assets/ice/ice6.png" id="6"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6")
+}],
+"loop": false,
+"name": &"fly",
+"speed": 12.0
+}]

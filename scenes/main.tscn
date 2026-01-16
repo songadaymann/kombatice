@@ -1,0 +1,135 @@
+[gd_scene load_steps=11 format=3 uid="uid://dud3ow57d1fbs"]
+
+[ext_resource type="Script" uid="uid://br8nsfyyhr6ok" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="SpriteFrames" path="res://resources/subzero_frames.tres" id="2_subzero"]
+[ext_resource type="SpriteFrames" uid="uid://cgjn4awrnb277" path="res://resources/ice_frames.tres" id="3_ice"]
+[ext_resource type="Script" uid="uid://61pkrqr3i646" path="res://scripts/beat_indicator.gd" id="6_beat"]
+[ext_resource type="VideoStream" uid="uid://coeous1xdsn3d" path="res://assets/intro-video.ogv" id="7_intro"]
+[ext_resource type="AudioStream" uid="uid://wkw64r6feyuq" path="res://assets/music/KombatIce.mp3" id="8_music"]
+[ext_resource type="FontFile" uid="uid://b2e4q1rhhwbo3" path="res://assets/Font/mortal_kombat/mk2.ttf" id="9_mkfont"]
+
+[sub_resource type="Animation" id="Animation_tefeu"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SubZero:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-260, 721)]
+}
+
+[sub_resource type="Animation" id="Animation_sugp2"]
+resource_name = "subzero_animation"
+length = 5.18
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SubZero:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.16666667, 0.33333334, 0.5, 0.6666667, 0.8333333, 1, 1.1666666, 1.3333334, 1.5, 1.6666666, 1.8333334, 2, 2.1666667, 2.3333333, 2.5, 2.6666667, 2.8333333, 3, 3.1666667, 3.3333333, 3.5, 3.6666667, 3.8333333, 4.1666665, 4.5, 4.8333335, 5, 5.1666665),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(-260, 721), Vector2(-110, 553.00006), Vector2(-46, 571), Vector2(24, 591.00006), Vector2(36, 637), Vector2(56, 677), Vector2(90, 685), Vector2(96, 645), Vector2(86, 615), Vector2(110, 655), Vector2(84, 667), Vector2(76, 719), Vector2(68, 753), Vector2(64, 731), Vector2(70, 685), Vector2(70, 627), Vector2(56, 577), Vector2(46, 539), Vector2(8, 517), Vector2(-44, 497), Vector2(-94, 499), Vector2(-158, 509), Vector2(-158, 509), Vector2(-158, 509), Vector2(-158, 509), Vector2(-158, 509), Vector2(-158, 509), Vector2(-158, 509), Vector2(-158, 509)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_jyhfs"]
+_data = {
+&"RESET": SubResource("Animation_tefeu"),
+&"subzero_animation": SubResource("Animation_sugp2")
+}
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_game")
+
+[node name="IntroVideo" type="VideoStreamPlayer" parent="."]
+offset_right = 1080.0
+offset_bottom = 1920.0
+stream = ExtResource("7_intro")
+
+[node name="LevelBackground" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(540, 960)
+
+[node name="IceProjectile" type="AnimatedSprite2D" parent="."]
+position = Vector2(658, 836)
+rotation = 1.5744728
+scale = Vector2(8, 8)
+sprite_frames = ExtResource("3_ice")
+animation = &"fly"
+
+[node name="Agent" type="AnimatedSprite2D" parent="."]
+position = Vector2(540, 960)
+
+[node name="SubZero" type="AnimatedSprite2D" parent="."]
+position = Vector2(-260, 721)
+scale = Vector2(7, 7)
+sprite_frames = ExtResource("2_subzero")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="PositionAnimator" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_jyhfs")
+}
+
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_music")
+
+[node name="BeatIndicator" type="Node2D" parent="."]
+position = Vector2(540, 1700)
+script = ExtResource("6_beat")
+inner_radius = 50.0
+outer_radius_max = 140.0
+ring_thickness = 8.0
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 600.0
+offset_bottom = 60.0
+theme_override_font_sizes/font_size = 32
+text = "Score: 0"
+
+[node name="TimingLabel" type="Label" parent="UI"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 100.0
+offset_right = 200.0
+offset_bottom = 200.0
+theme_override_fonts/font = ExtResource("9_mkfont")
+theme_override_font_sizes/font_size = 80
+horizontal_alignment = 1
+
+[node name="EndPanel" type="Panel" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 100.0
+offset_top = 400.0
+offset_right = -100.0
+offset_bottom = -400.0
+
+[node name="EndLabel" type="Label" parent="UI/EndPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.84, 0, 1)
+theme_override_fonts/font = ExtResource("9_mkfont")
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 1
+vertical_alignment = 1

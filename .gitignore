@@ -1,0 +1,29 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Claude Code
+.claude/
+
+# Human materials (source files, not needed in repo)
+human-materials-ignore/
+
+# Godot-specific ignores
+*.import
+export.cfg
+export_presets.cfg
+
+# Imported translations (Godot 4+)
+*.translation
+
+# Mono-specific ignores
+.mono/
+data_*/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
