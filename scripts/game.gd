@@ -18,6 +18,8 @@ var debug_placement_mode: bool = false  # Press P to toggle, then click to place
 @onready var audio_player: AudioStreamPlayer = $AudioPlayer
 @onready var end_panel: Panel = $UI/EndPanel
 @onready var end_label: Label = $UI/EndPanel/EndLabel
+@onready var loading_screen: Panel = $UI/LoadingScreen
+@onready var loading_bar_fill: ColorRect = $UI/LoadingScreen/LoadingBarFill
 
 # Level textures (loaded at runtime)
 var level_textures: Array[Texture2D] = []
@@ -31,6 +33,7 @@ const AGENT_FPS: float = 30.0
 
 # Game state
 var score: int = 0
+var is_loading: bool = true  # Show loading screen first
 var is_intro: bool = true  # First playthrough is intro (no gameplay)
 var can_shoot: bool = false
 var has_shot_this_cycle: bool = false  # Track if player has shot this 8-beat cycle
@@ -38,6 +41,11 @@ var game_started: bool = false
 var game_over: bool = false
 var game_time: float = 0.0  # Track time manually for beat sync
 var intro_special_triggered: bool = false  # Track if we've triggered the intro special animation
+
+# Loading screen
+const LOADING_DURATION: float = 3.0  # How long to show loading screen
+var loading_time: float = 0.0
+const LOADING_BAR_WIDTH: float = 600.0  # Full width of loading bar
 
 # Result tracking
 var perfect_count: int = 0
@@ -131,7 +139,39 @@ func _ready() -> void:
 	if level_textures.size() > 0 and level_background:
 		level_background.texture = level_textures[0]
 
-	# Start intro sequence
+	# Start with loading screen
+	_start_loading()
+
+func _start_loading() -> void:
+	is_loading = true
+	loading_time = 0.0
+
+	# Show loading screen, hide everything else
+	if loading_screen:
+		loading_screen.visible = true
+	if loading_bar_fill:
+		loading_bar_fill.offset_right = loading_bar_fill.offset_left  # Start at 0 width
+
+	# Hide gameplay elements during loading
+	if intro_video:
+		intro_video.visible = false
+	if level_background:
+		level_background.visible = false
+	if agent:
+		agent.visible = false
+	if sub_zero:
+		sub_zero.visible = false
+	if ice_projectile:
+		ice_projectile.visible = false
+	if beat_indicator:
+		beat_indicator.visible = false
+	if score_label:
+		score_label.visible = false
+
+func _finish_loading() -> void:
+	is_loading = false
+	if loading_screen:
+		loading_screen.visible = false
 	_start_intro()
 
 func _start_intro() -> void:
@@ -139,8 +179,9 @@ func _start_intro() -> void:
 	can_shoot = false
 	intro_special_triggered = false
 
-	# Set SubZero to smaller intro scale
+	# Show Sub-Zero for intro
 	if sub_zero:
+		sub_zero.visible = true
 		sub_zero.scale = SUBZERO_INTRO_SCALE
 
 	# Show intro video, hide gameplay elements
@@ -226,6 +267,16 @@ const INTRO_SPECIAL_TRIGGER_TIME: float = 1.47
 var original_position: Vector2 = Vector2.ZERO
 
 func _process(delta: float) -> void:
+	# Handle loading screen
+	if is_loading:
+		loading_time += delta
+		var progress = min(loading_time / LOADING_DURATION, 1.0)
+		if loading_bar_fill:
+			loading_bar_fill.offset_right = loading_bar_fill.offset_left + (LOADING_BAR_WIDTH * progress)
+		if loading_time >= LOADING_DURATION:
+			_finish_loading()
+		return
+
 	# Apply camera shake
 	if shake_amount > 0.1:
 		position = original_position + Vector2(
@@ -378,8 +429,8 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("shoot_ice") and can_shoot and not has_shot_this_cycle and not debug_placement_mode:
 		shoot_ice()
 
-	# Skip intro with spacebar
-	if event.is_action_pressed("shoot_ice") and is_intro:
+	# Skip intro with spacebar (but not during loading)
+	if event.is_action_pressed("shoot_ice") and is_intro and not is_loading:
 		if position_animator:
 			position_animator.stop()
 		if intro_video:
@@ -539,5 +590,5 @@ func _reset_game() -> void:
 	if end_panel:
 		end_panel.visible = false
 
-	# Restart from intro
-	_start_intro()
+	# Restart from loading screen
+	_start_loading()

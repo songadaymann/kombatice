@@ -133,3 +133,62 @@ theme_override_fonts/font = ExtResource("9_mkfont")
 theme_override_font_sizes/font_size = 48
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="LoadingScreen" type="Panel" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = null
+
+[node name="Background" type="ColorRect" parent="UI/LoadingScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="LoadingSubZero" type="AnimatedSprite2D" parent="UI/LoadingScreen"]
+position = Vector2(540, 800)
+scale = Vector2(10, 10)
+sprite_frames = ExtResource("2_subzero")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="TitleLabel" type="Label" parent="UI/LoadingScreen"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -400.0
+offset_top = 1200.0
+offset_right = 400.0
+offset_bottom = 1350.0
+theme_override_colors/font_color = Color(0.9, 0.1, 0.1, 1)
+theme_override_fonts/font = ExtResource("9_mkfont")
+theme_override_font_sizes/font_size = 120
+text = "KOMBAT ICE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LoadingBarBg" type="ColorRect" parent="UI/LoadingScreen"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 1450.0
+offset_right = 300.0
+offset_bottom = 1490.0
+color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="LoadingBarFill" type="ColorRect" parent="UI/LoadingScreen"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 1450.0
+offset_right = -300.0
+offset_bottom = 1490.0
+color = Color(0.9, 0.1, 0.1, 1)

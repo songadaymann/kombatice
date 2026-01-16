@@ -12,6 +12,10 @@ human-materials-ignore/
 export.cfg
 export_presets.cfg
 
+# Build output (except .gitkeep)
+build/web/*
+!build/web/.gitkeep
+
 # Imported translations (Godot 4+)
 *.translation
 
