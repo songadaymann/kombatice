@@ -12,9 +12,7 @@ human-materials-ignore/
 export.cfg
 export_presets.cfg
 
-# Build output (except .gitkeep)
-build/web/*
-!build/web/.gitkeep
+# Build output tracked for Vercel deployment
 
 # Imported translations (Godot 4+)
 *.translation
