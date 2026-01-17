@@ -999,11 +999,26 @@
         const container = document.getElementById('game-container');
         const wrapper = document.getElementById('game-wrapper');
 
-        const scaleX = window.innerWidth / 1080;
-        const scaleY = window.innerHeight / 1920;
+        // Use multiple methods to get viewport size (more reliable in iframes)
+        const width = Math.max(
+            window.innerWidth || 0,
+            document.documentElement.clientWidth || 0,
+            container.clientWidth || 0
+        );
+        const height = Math.max(
+            window.innerHeight || 0,
+            document.documentElement.clientHeight || 0,
+            container.clientHeight || 0
+        );
+
+        const scaleX = width / 1080;
+        const scaleY = height / 1920;
         currentScale = Math.min(scaleX, scaleY);
 
         wrapper.style.transform = `scale(${currentScale})`;
+
+        // Debug logging (can remove later)
+        console.log('Viewport:', width, 'x', height, 'Scale:', currentScale);
     }
 
     // ===== INITIALIZATION =====
@@ -1026,8 +1041,10 @@
             gameWrapper: document.getElementById('game-wrapper')
         };
 
-        // Set up scaling
+        // Set up scaling (call multiple times to handle iframe load timing)
         updateScale();
+        setTimeout(updateScale, 100);
+        setTimeout(updateScale, 500);
         window.addEventListener('resize', updateScale);
 
         // Set up input handlers
