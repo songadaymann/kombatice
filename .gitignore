@@ -1,21 +1,20 @@
-# Godot 4+ specific ignores
+# Godot project (deprecated - using html-version now)
 .godot/
+/assets/
+/build/
+/resources/
+/scenes/
+/scripts/
+/project.godot
+/export_presets.cfg
+*.import
+*.translation
 
 # Claude Code
 .claude/
 
 # Human materials (source files, not needed in repo)
 human-materials-ignore/
-
-# Godot-specific ignores
-*.import
-export.cfg
-export_presets.cfg
-
-# Build output tracked for Vercel deployment
-
-# Imported translations (Godot 4+)
-*.translation
 
 # Mono-specific ignores
 .mono/
@@ -30,3 +29,10 @@ data_*/
 ehthumbs.db
 Thumbs.db
 .vercel
+
+# Symlinks
+/agents.md
+/games.json
+/GAME_INTEGRATION.md
+/PROGRESS.md
+/.gitattributes
