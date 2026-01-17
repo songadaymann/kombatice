@@ -610,9 +610,13 @@
     }
 
     async function startAudio() {
+        console.log('startAudio called, context state:', audioContext.state, 'currentTime:', audioContext.currentTime);
+
         // Resume audio context if suspended (required after user interaction)
         if (audioContext.state === 'suspended') {
+            console.log('Resuming suspended audio context...');
             await audioContext.resume();
+            console.log('Audio context resumed, currentTime:', audioContext.currentTime);
         }
 
         // Use pre-decoded buffer for instant playback
@@ -622,6 +626,7 @@
 
         audioStartTime = audioContext.currentTime;
         state.gameStartTime = audioStartTime;
+        console.log('Audio starting at audioStartTime:', audioStartTime);
         audioSource.start(0);
 
         audioSource.onended = () => {
@@ -1142,8 +1147,13 @@
         // Wait for START button click
         const startBtn = document.getElementById('start-btn');
         await new Promise(resolve => {
-            startBtn.addEventListener('click', (e) => {
+            startBtn.addEventListener('click', async (e) => {
                 e.stopPropagation(); // Prevent click from bubbling to document
+                // Resume audio context on this user interaction
+                if (audioContext.state === 'suspended') {
+                    console.log('Resuming audio context on START click');
+                    await audioContext.resume();
+                }
                 resolve();
             }, { once: true });
         });
