@@ -442,7 +442,7 @@ Scale: 1.6
 
         <div id="game-area">
             <div id="game-wrapper">
-                <img id="level-background" src="assets/levels/level1.jpeg" alt="">
+                <img id="level-background" src="game-assets/levels/level1.jpeg" alt="">
 
                 <img id="agent" src="" alt="">
                 <img id="sub-zero" src="" alt="">
@@ -491,7 +491,7 @@ Scale: 1.6
         const idleNums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11];
         for (const num of idleNums) {
             const img = new Image();
-            img.src = `assets/idle/idle${num}.png`;
+            img.src = `game-assets/idle/idle${num}.png`;
             await new Promise(resolve => img.onload = resolve);
             idleFrames.push(img);
         }
@@ -499,7 +499,7 @@ Scale: 1.6
         // Load ice frames
         for (let i = 1; i <= 6; i++) {
             const img = new Image();
-            img.src = `assets/ice/ice${i}.png`;
+            img.src = `game-assets/ice/ice${i}.png`;
             await new Promise(resolve => img.onload = resolve);
             iceFrames.push(img);
         }
@@ -508,7 +508,7 @@ Scale: 1.6
         for (let i = 0; i < 100; i++) {
             const frameNum = 108958 + i;
             const img = new Image();
-            img.src = `assets/agent/agent_${String(frameNum).padStart(8, '0')}.png`;
+            img.src = `game-assets/agent/agent_${String(frameNum).padStart(8, '0')}.png`;
             await new Promise(resolve => img.onload = resolve);
             agentFrames.push(img);
         }
@@ -661,7 +661,7 @@ Scale: 1.6
         elements.agent.style.display = agentVisible ? 'block' : 'none';
 
         // Update Background
-        elements.background.src = `assets/levels/level${bgLevel}.jpeg`;
+        elements.background.src = `game-assets/levels/level${bgLevel}.jpeg`;
 
         // Update value displays
         document.getElementById('subzero-x-val').textContent = subzeroX;

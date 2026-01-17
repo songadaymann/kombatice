@@ -7,7 +7,7 @@
     <style>
         @font-face {
             font-family: 'MortalKombat';
-            src: url('assets/Font/MK4.TTF') format('truetype');
+            src: url('game-assets/Font/MK4.TTF') format('truetype');
         }
 
         * {
@@ -267,7 +267,7 @@
             <!-- Loading Screen -->
             <div id="loading-screen">
                 <h1>KOMBAT ICE</h1>
-                <img id="loading-subzero" src="assets/idle/idle0.png" alt="Sub-Zero">
+                <img id="loading-subzero" src="game-assets/idle/idle0.png" alt="Sub-Zero">
                 <div id="loading-bar-container">
                     <div id="loading-bar"></div>
                 </div>
@@ -413,7 +413,7 @@
 
         // Load and pre-decode music
         loadingText.textContent = 'Loading music...';
-        const musicData = await loadAudio('assets/KombatIce.mp3');
+        const musicData = await loadAudio('game-assets/KombatIce.mp3');
 
         // Create audio context and pre-decode for instant playback later
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -423,7 +423,7 @@
         // Load video
         loadingText.textContent = 'Loading video...';
         assets.video = document.getElementById('intro-video');
-        assets.video.src = 'assets/intro-video.mp4';
+        assets.video.src = 'game-assets/intro-video.mp4';
         await new Promise((resolve, reject) => {
             assets.video.oncanplaythrough = () => {
                 console.log('Video loaded successfully');
@@ -440,7 +440,7 @@
         // Load levels
         loadingText.textContent = 'Loading levels...';
         for (let i = 1; i <= CONFIG.LEVEL_COUNT; i++) {
-            assets.levels.push(await loadImage(`assets/levels/level${i}.jpeg`));
+            assets.levels.push(await loadImage(`game-assets/levels/level${i}.jpeg`));
             updateProgress();
         }
 
@@ -449,7 +449,7 @@
         for (let i = 0; i < CONFIG.AGENT_FRAME_COUNT; i++) {
             const frameNum = CONFIG.AGENT_FRAME_START + i;
             const paddedNum = String(frameNum).padStart(8, '0');
-            assets.agent.push(await loadImage(`assets/agent/agent_${paddedNum}.png`));
+            assets.agent.push(await loadImage(`game-assets/agent/agent_${paddedNum}.png`));
             updateProgress();
         }
 
@@ -457,7 +457,7 @@
         loadingText.textContent = 'Loading Sub-Zero...';
         const idleFrameNumbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11];
         for (const num of idleFrameNumbers) {
-            assets.idle.push(await loadImage(`assets/idle/idle${num}.png`));
+            assets.idle.push(await loadImage(`game-assets/idle/idle${num}.png`));
             updateProgress();
         }
         // Add one more to make 12
@@ -467,14 +467,14 @@
         // Load ice frames
         loadingText.textContent = 'Loading ice...';
         for (let i = 1; i <= CONFIG.ICE_FRAME_COUNT; i++) {
-            assets.ice.push(await loadImage(`assets/ice/ice${i}.png`));
+            assets.ice.push(await loadImage(`game-assets/ice/ice${i}.png`));
             updateProgress();
         }
 
         // Load special frames
         loadingText.textContent = 'Loading special...';
         for (let i = 0; i < CONFIG.SPECIAL_FRAME_COUNT; i++) {
-            assets.special.push(await loadImage(`assets/special/ice_special${i}.png`));
+            assets.special.push(await loadImage(`game-assets/special/ice_special${i}.png`));
             updateProgress();
         }
 
@@ -1049,7 +1049,7 @@
         const idleNums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11];
         const loadingIdleInterval = setInterval(() => {
             loadingIdleFrame = (loadingIdleFrame + 1) % idleNums.length;
-            loadingSubzero.src = `assets/idle/idle${idleNums[loadingIdleFrame]}.png`;
+            loadingSubzero.src = `game-assets/idle/idle${idleNums[loadingIdleFrame]}.png`;
         }, 1000 / 12);
 
         // Load assets
