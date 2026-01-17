@@ -10,6 +10,11 @@
             src: url('game-assets/Font/mk4.ttf') format('truetype');
         }
 
+        @keyframes pulse {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -534,8 +539,32 @@
         }
 
         elements.introVideo.onended = () => {
-            startGameplay();
+            showGoPrompt();
         };
+    }
+
+    function showGoPrompt() {
+        state.phase = 'waitingToStart';
+        // Keep video on last frame (it's already paused at end)
+        elements.skipHint.style.display = 'none';
+
+        // Show GO text
+        const goText = document.createElement('div');
+        goText.id = 'go-prompt';
+        goText.textContent = 'GO';
+        goText.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'MortalKombat', 'Arial Black', sans-serif;
+            font-size: 200px;
+            color: #ff2222;
+            text-shadow: 0 0 30px #ff0000, 0 0 60px #aa0000;
+            z-index: 200;
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        `;
+        elements.gameWrapper.appendChild(goText);
     }
 
     async function startGameplay() {
@@ -634,6 +663,12 @@
     function handleInput() {
         if (state.phase === 'intro') {
             elements.introVideo.pause();
+            showGoPrompt();
+        } else if (state.phase === 'waitingToStart') {
+            // Remove GO prompt and start gameplay
+            const goPrompt = document.getElementById('go-prompt');
+            if (goPrompt) goPrompt.remove();
+            elements.introVideo.style.display = 'none';
             startGameplay();
         } else if (state.phase === 'playing' && !state.hasShotThisCycle) {
             shootIce();
