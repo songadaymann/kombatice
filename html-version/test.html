@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kombat Ice - Position Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        #main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Control Panel */
+        #controls {
+            width: 350px;
+            background: #16213e;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        #controls h1 {
+            color: #00d4ff;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .control-group {
+            background: #1a1a2e;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .control-group h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group h3 .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .slider-row label {
+            width: 40px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .slider-row input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .slider-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #00d4ff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .slider-row .value {
+            width: 50px;
+            text-align: right;
+            font-family: monospace;
+            color: #00d4ff;
+        }
+
+        .coords-display {
+            background: #0d0d1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #00ff88;
+            margin-top: 10px;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .scale-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .scale-row label {
+            font-size: 14px;
+            color: #888;
+            width: 40px;
+        }
+
+        .scale-row input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .scale-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #ff8800;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        #copy-btn:hover {
+            background: #00ff88;
+        }
+
+        #copy-status {
+            text-align: center;
+            margin-top: 10px;
+            color: #00ff88;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Game Preview */
+        #game-area {
+            margin-left: 350px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 1080px;
+            height: 1920px;
+            background: #000;
+            transform-origin: top center;
+            overflow: hidden;
+        }
+
+        #level-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #sub-zero {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            image-rendering: pixelated;
+            cursor: move;
+        }
+
+        #ice-projectile {
+            position: absolute;
+            image-rendering: pixelated;
+            cursor: move;
+            z-index: 15;
+        }
+
+        #ice-target {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            cursor: move;
+        }
+
+        #beat-indicator {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            cursor: move;
+        }
+
+        #agent {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            image-rendering: pixelated;
+        }
+
+        /* Crosshair overlays */
+        .crosshair {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: currentColor;
+        }
+
+        .crosshair::before {
+            width: 40px;
+            height: 2px;
+            left: -20px;
+            top: -1px;
+        }
+
+        .crosshair::after {
+            width: 2px;
+            height: 40px;
+            left: -1px;
+            top: -20px;
+        }
+
+        #subzero-crosshair { color: cyan; }
+        #target-crosshair { color: red; }
+        #indicator-crosshair { color: gold; }
+        #ice-crosshair { color: #00ffff; }
+
+        /* Toggle visibility */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .toggle-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .toggle-row label {
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <div id="controls">
+            <h1>Position Test</h1>
+
+            <!-- Sub-Zero Controls -->
+            <div class="control-group">
+                <h3><span class="color-dot" style="background: cyan;"></span> Sub-Zero</h3>
+                <div class="toggle-row">
+                    <input type="checkbox" id="subzero-visible" checked>
+                    <label for="subzero-visible">Visible</label>
+                </div>
+                <div class="slider-row">
+                    <label>X:</label>
+                    <input type="range" id="subzero-x" min="0" max="1080" value="200">
+                    <span class="value" id="subzero-x-val">200</span>
+                </div>
+                <div class="slider-row">
+                    <label>Y:</label>
+                    <input type="range" id="subzero-y" min="0" max="1920" value="1400">
+                    <span class="value" id="subzero-y-val">1400</span>
+                </div>
+                <div class="scale-row">
+                    <label>Scale:</label>
+                    <input type="range" id="subzero-scale" min="0.5" max="3" step="0.1" value="1.6">
+                    <span class="value" id="subzero-scale-val">1.6</span>
+                </div>
+                <div class="coords-display" id="subzero-coords">
+                    SUBZERO_POS: { x: 200, y: 1400 }
+Scale: 1.6
+                </div>
+            </div>
+
+            <!-- Ice Projectile Controls -->
+            <div class="control-group">
+                <h3><span class="color-dot" style="background: #00ffff;"></span> Ice Projectile</h3>
+                <div class="toggle-row">
+                    <input type="checkbox" id="ice-visible" checked>
+                    <label for="ice-visible">Visible</label>
+                </div>
+                <div class="slider-row">
+                    <label>X:</label>
+                    <input type="range" id="ice-x" min="0" max="1080" value="745">
+                    <span class="value" id="ice-x-val">745</span>
+                </div>
+                <div class="slider-row">
+                    <label>Y:</label>
+                    <input type="range" id="ice-y" min="0" max="1920" value="1706">
+                    <span class="value" id="ice-y-val">1706</span>
+                </div>
+                <div class="slider-row">
+                    <label>Rot:</label>
+                    <input type="range" id="ice-rotation" min="-180" max="180" value="90">
+                    <span class="value" id="ice-rotation-val">90</span>
+                </div>
+                <div class="scale-row">
+                    <label>Scale:</label>
+                    <input type="range" id="ice-scale" min="0.5" max="4" step="0.1" value="0.9">
+                    <span class="value" id="ice-scale-val">0.9</span>
+                </div>
+                <div class="coords-display" id="ice-coords">
+                    ICE: { rotation: 90, scale: 0.9 }
+                </div>
+            </div>
+
+            <!-- Ice Target Controls -->
+            <div class="control-group">
+                <h3><span class="color-dot" style="background: red;"></span> Ice Target</h3>
+                <div class="toggle-row">
+                    <input type="checkbox" id="target-visible" checked>
+                    <label for="target-visible">Visible</label>
+                </div>
+                <div class="slider-row">
+                    <label>X:</label>
+                    <input type="range" id="target-x" min="0" max="1080" value="745">
+                    <span class="value" id="target-x-val">745</span>
+                </div>
+                <div class="slider-row">
+                    <label>Y:</label>
+                    <input type="range" id="target-y" min="0" max="1920" value="1706">
+                    <span class="value" id="target-y-val">1706</span>
+                </div>
+                <div class="coords-display" id="target-coords">
+                    ICE_TARGET_POS: { x: 745, y: 1706 }
+                </div>
+            </div>
+
+            <!-- Beat Indicator Controls -->
+            <div class="control-group">
+                <h3><span class="color-dot" style="background: gold;"></span> Beat Indicator</h3>
+                <div class="toggle-row">
+                    <input type="checkbox" id="indicator-visible" checked>
+                    <label for="indicator-visible">Visible</label>
+                </div>
+                <div class="slider-row">
+                    <label>X:</label>
+                    <input type="range" id="indicator-x" min="0" max="1080" value="745">
+                    <span class="value" id="indicator-x-val">745</span>
+                </div>
+                <div class="slider-row">
+                    <label>Y:</label>
+                    <input type="range" id="indicator-y" min="0" max="1920" value="1706">
+                    <span class="value" id="indicator-y-val">1706</span>
+                </div>
+                <div class="scale-row">
+                    <label>Size:</label>
+                    <input type="range" id="indicator-size" min="60" max="300" value="297">
+                    <span class="value" id="indicator-size-val">297</span>
+                </div>
+                <div class="coords-display" id="indicator-coords">
+                    BEAT_INDICATOR: { x: 745, y: 1706, size: 297 }
+                </div>
+            </div>
+
+            <!-- Agent Controls -->
+            <div class="control-group">
+                <h3><span class="color-dot" style="background: #00ff88;"></span> Agent</h3>
+                <div class="toggle-row">
+                    <input type="checkbox" id="agent-visible" checked>
+                    <label for="agent-visible">Visible</label>
+                </div>
+                <div class="slider-row">
+                    <label>Y:</label>
+                    <input type="range" id="agent-y" min="0" max="1500" value="69">
+                    <span class="value" id="agent-y-val">69</span>
+                </div>
+                <div class="scale-row">
+                    <label>Width:</label>
+                    <input type="range" id="agent-width" min="100" max="2000" value="996">
+                    <span class="value" id="agent-width-val">996</span>
+                </div>
+                <div class="coords-display" id="agent-coords">
+                    AGENT: { bottom: 69, width: 996 }
+                </div>
+            </div>
+
+            <!-- Background Selection -->
+            <div class="control-group">
+                <h3>Background</h3>
+                <div class="slider-row">
+                    <label>Lvl:</label>
+                    <input type="range" id="bg-level" min="1" max="24" value="1">
+                    <span class="value" id="bg-level-val">1</span>
+                </div>
+            </div>
+
+            <button id="copy-btn">Copy All Coordinates</button>
+            <div id="copy-status">Copied!</div>
+        </div>
+
+        <div id="game-area">
+            <div id="game-wrapper">
+                <img id="level-background" src="assets/levels/level1.jpeg" alt="">
+
+                <img id="agent" src="" alt="">
+                <img id="sub-zero" src="" alt="">
+                <img id="ice-projectile" src="" alt="">
+
+                <canvas id="beat-indicator" width="297" height="297"></canvas>
+
+                <div id="ice-target"></div>
+
+                <!-- Crosshairs -->
+                <div class="crosshair" id="subzero-crosshair"></div>
+                <div class="crosshair" id="target-crosshair"></div>
+                <div class="crosshair" id="indicator-crosshair"></div>
+                <div class="crosshair" id="ice-crosshair"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Elements
+    const elements = {
+        subZero: document.getElementById('sub-zero'),
+        iceProjectile: document.getElementById('ice-projectile'),
+        iceTarget: document.getElementById('ice-target'),
+        beatIndicator: document.getElementById('beat-indicator'),
+        agent: document.getElementById('agent'),
+        background: document.getElementById('level-background'),
+        gameWrapper: document.getElementById('game-wrapper'),
+        subzeroCrosshair: document.getElementById('subzero-crosshair'),
+        targetCrosshair: document.getElementById('target-crosshair'),
+        indicatorCrosshair: document.getElementById('indicator-crosshair'),
+        iceCrosshair: document.getElementById('ice-crosshair')
+    };
+
+    // Animation state
+    let idleFrames = [];
+    let agentFrames = [];
+    let iceFrames = [];
+    let currentIdleFrame = 0;
+    let currentAgentFrame = 0;
+    let currentIceFrame = 0;
+
+    // Load frames
+    async function loadFrames() {
+        // Load idle frames
+        const idleNums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11];
+        for (const num of idleNums) {
+            const img = new Image();
+            img.src = `assets/idle/idle${num}.png`;
+            await new Promise(resolve => img.onload = resolve);
+            idleFrames.push(img);
+        }
+
+        // Load ice frames
+        for (let i = 1; i <= 6; i++) {
+            const img = new Image();
+            img.src = `assets/ice/ice${i}.png`;
+            await new Promise(resolve => img.onload = resolve);
+            iceFrames.push(img);
+        }
+
+        // Load all 100 agent frames
+        for (let i = 0; i < 100; i++) {
+            const frameNum = 108958 + i;
+            const img = new Image();
+            img.src = `assets/agent/agent_${String(frameNum).padStart(8, '0')}.png`;
+            await new Promise(resolve => img.onload = resolve);
+            agentFrames.push(img);
+        }
+
+        // Start animations
+        setInterval(() => {
+            currentIdleFrame = (currentIdleFrame + 1) % idleFrames.length;
+            if (document.getElementById('subzero-visible').checked) {
+                elements.subZero.src = idleFrames[currentIdleFrame].src;
+            }
+        }, 1000 / 12);
+
+        setInterval(() => {
+            currentIceFrame = (currentIceFrame + 1) % iceFrames.length;
+            if (document.getElementById('ice-visible').checked) {
+                elements.iceProjectile.src = iceFrames[currentIceFrame].src;
+            }
+        }, 1000 / 15);
+
+        setInterval(() => {
+            currentAgentFrame = (currentAgentFrame + 1) % agentFrames.length;
+            if (document.getElementById('agent-visible').checked) {
+                elements.agent.src = agentFrames[currentAgentFrame].src;
+            }
+        }, 1000 / 30);
+    }
+
+    // Draw beat indicator
+    function drawBeatIndicator(progress = 0.5) {
+        const canvas = elements.beatIndicator;
+        const ctx = canvas.getContext('2d');
+        const size = parseInt(document.getElementById('indicator-size').value);
+        canvas.width = size;
+        canvas.height = size;
+
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const innerRadius = size * 0.17;
+        const outerRadiusMax = size * 0.42;
+
+        const currentOuterRadius = outerRadiusMax - (outerRadiusMax - innerRadius) * progress;
+
+        ctx.clearRect(0, 0, size, size);
+
+        // Inner circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(50, 150, 255, 0.9)';
+        ctx.fill();
+
+        // Outer ring
+        const proximity = 1 - Math.abs(currentOuterRadius - innerRadius) / (outerRadiusMax - innerRadius);
+        const r = Math.round(255 + (255 - 255) * proximity * proximity);
+        const g = Math.round(255 + (215 - 255) * proximity * proximity);
+        const b = Math.round(255 + (0 - 255) * proximity * proximity);
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, currentOuterRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.8)`;
+        ctx.lineWidth = 6;
+        ctx.stroke();
+    }
+
+    // Animate beat indicator
+    let indicatorProgress = 0;
+    setInterval(() => {
+        indicatorProgress = (indicatorProgress + 0.02) % 1;
+        drawBeatIndicator(indicatorProgress);
+    }, 50);
+
+    // Draw ice target marker
+    function drawIceTarget() {
+        const el = elements.iceTarget;
+        el.style.width = '80px';
+        el.style.height = '80px';
+        el.style.background = 'radial-gradient(circle, rgba(255,0,0,0.3) 0%, transparent 70%)';
+        el.style.border = '3px solid red';
+        el.style.borderRadius = '50%';
+    }
+    drawIceTarget();
+
+    // Update positions from sliders
+    function updatePositions() {
+        const subzeroX = document.getElementById('subzero-x').value;
+        const subzeroY = document.getElementById('subzero-y').value;
+        const subzeroScale = document.getElementById('subzero-scale').value;
+        const subzeroVisible = document.getElementById('subzero-visible').checked;
+
+        const iceX = document.getElementById('ice-x').value;
+        const iceY = document.getElementById('ice-y').value;
+        const iceRotation = document.getElementById('ice-rotation').value;
+        const iceScale = document.getElementById('ice-scale').value;
+        const iceVisible = document.getElementById('ice-visible').checked;
+
+        const targetX = document.getElementById('target-x').value;
+        const targetY = document.getElementById('target-y').value;
+        const targetVisible = document.getElementById('target-visible').checked;
+
+        const indicatorX = document.getElementById('indicator-x').value;
+        const indicatorY = document.getElementById('indicator-y').value;
+        const indicatorSize = document.getElementById('indicator-size').value;
+        const indicatorVisible = document.getElementById('indicator-visible').checked;
+
+        const agentY = document.getElementById('agent-y').value;
+        const agentWidth = document.getElementById('agent-width').value;
+        const agentVisible = document.getElementById('agent-visible').checked;
+
+        const bgLevel = document.getElementById('bg-level').value;
+
+        // Update Sub-Zero
+        elements.subZero.style.left = subzeroX + 'px';
+        elements.subZero.style.top = subzeroY + 'px';
+        elements.subZero.style.width = (280 * subzeroScale) + 'px';
+        elements.subZero.style.display = subzeroVisible ? 'block' : 'none';
+        elements.subzeroCrosshair.style.left = subzeroX + 'px';
+        elements.subzeroCrosshair.style.top = subzeroY + 'px';
+        elements.subzeroCrosshair.style.display = subzeroVisible ? 'block' : 'none';
+
+        // Update Ice Projectile
+        elements.iceProjectile.style.left = iceX + 'px';
+        elements.iceProjectile.style.top = iceY + 'px';
+        elements.iceProjectile.style.width = (120 * iceScale) + 'px';
+        elements.iceProjectile.style.transform = `translate(-50%, -50%) rotate(${iceRotation}deg)`;
+        elements.iceProjectile.style.display = iceVisible ? 'block' : 'none';
+        elements.iceCrosshair.style.left = iceX + 'px';
+        elements.iceCrosshair.style.top = iceY + 'px';
+        elements.iceCrosshair.style.display = iceVisible ? 'block' : 'none';
+
+        // Update Ice Target
+        elements.iceTarget.style.left = targetX + 'px';
+        elements.iceTarget.style.top = targetY + 'px';
+        elements.iceTarget.style.display = targetVisible ? 'block' : 'none';
+        elements.targetCrosshair.style.left = targetX + 'px';
+        elements.targetCrosshair.style.top = targetY + 'px';
+        elements.targetCrosshair.style.display = targetVisible ? 'block' : 'none';
+
+        // Update Beat Indicator
+        elements.beatIndicator.style.left = indicatorX + 'px';
+        elements.beatIndicator.style.top = indicatorY + 'px';
+        elements.beatIndicator.style.width = indicatorSize + 'px';
+        elements.beatIndicator.style.height = indicatorSize + 'px';
+        elements.beatIndicator.style.display = indicatorVisible ? 'block' : 'none';
+        elements.indicatorCrosshair.style.left = indicatorX + 'px';
+        elements.indicatorCrosshair.style.top = indicatorY + 'px';
+        elements.indicatorCrosshair.style.display = indicatorVisible ? 'block' : 'none';
+
+        // Update Agent
+        elements.agent.style.bottom = agentY + 'px';
+        elements.agent.style.width = agentWidth + 'px';
+        elements.agent.style.display = agentVisible ? 'block' : 'none';
+
+        // Update Background
+        elements.background.src = `assets/levels/level${bgLevel}.jpeg`;
+
+        // Update value displays
+        document.getElementById('subzero-x-val').textContent = subzeroX;
+        document.getElementById('subzero-y-val').textContent = subzeroY;
+        document.getElementById('subzero-scale-val').textContent = parseFloat(subzeroScale).toFixed(1);
+        document.getElementById('ice-x-val').textContent = iceX;
+        document.getElementById('ice-y-val').textContent = iceY;
+        document.getElementById('ice-rotation-val').textContent = iceRotation + '°';
+        document.getElementById('ice-scale-val').textContent = parseFloat(iceScale).toFixed(1);
+        document.getElementById('target-x-val').textContent = targetX;
+        document.getElementById('target-y-val').textContent = targetY;
+        document.getElementById('indicator-x-val').textContent = indicatorX;
+        document.getElementById('indicator-y-val').textContent = indicatorY;
+        document.getElementById('indicator-size-val').textContent = indicatorSize;
+        document.getElementById('agent-y-val').textContent = agentY;
+        document.getElementById('agent-width-val').textContent = agentWidth;
+        document.getElementById('bg-level-val').textContent = bgLevel;
+
+        // Update coord displays
+        document.getElementById('subzero-coords').textContent =
+            `SUBZERO_POS: { x: ${subzeroX}, y: ${subzeroY} }\nScale: ${subzeroScale}`;
+        document.getElementById('ice-coords').textContent =
+            `ICE: { rotation: ${iceRotation}, scale: ${iceScale} }`;
+        document.getElementById('target-coords').textContent =
+            `ICE_TARGET_POS: { x: ${targetX}, y: ${targetY} }`;
+        document.getElementById('indicator-coords').textContent =
+            `BEAT_INDICATOR: { x: ${indicatorX}, y: ${indicatorY}, size: ${indicatorSize} }`;
+        document.getElementById('agent-coords').textContent =
+            `AGENT: { bottom: ${agentY}, width: ${agentWidth} }`;
+    }
+
+    // Add event listeners to all sliders and checkboxes
+    document.querySelectorAll('input[type="range"], input[type="checkbox"]').forEach(input => {
+        input.addEventListener('input', updatePositions);
+    });
+
+    // Copy coordinates
+    document.getElementById('copy-btn').addEventListener('click', () => {
+        const coords = `// Position Configuration
+const CONFIG = {
+    SUBZERO_POS: { x: ${document.getElementById('subzero-x').value}, y: ${document.getElementById('subzero-y').value} },
+    SUBZERO_SCALE: ${document.getElementById('subzero-scale').value},
+    ICE_TARGET_POS: { x: ${document.getElementById('target-x').value}, y: ${document.getElementById('target-y').value} },
+    ICE_ROTATION: ${document.getElementById('ice-rotation').value},
+    ICE_SCALE: ${document.getElementById('ice-scale').value},
+    BEAT_INDICATOR_POS: { x: ${document.getElementById('indicator-x').value}, y: ${document.getElementById('indicator-y').value} },
+    BEAT_INDICATOR_SIZE: ${document.getElementById('indicator-size').value},
+    AGENT_BOTTOM: ${document.getElementById('agent-y').value},
+    AGENT_WIDTH: ${document.getElementById('agent-width').value}
+};`;
+
+        navigator.clipboard.writeText(coords).then(() => {
+            const status = document.getElementById('copy-status');
+            status.style.opacity = 1;
+            setTimeout(() => status.style.opacity = 0, 2000);
+        });
+    });
+
+    // Scale game wrapper to fit viewport
+    function updateScale() {
+        const gameArea = document.getElementById('game-area');
+        const availableWidth = window.innerWidth - 350;
+        const availableHeight = window.innerHeight - 40;
+
+        const scaleX = availableWidth / 1080;
+        const scaleY = availableHeight / 1920;
+        const scale = Math.min(scaleX, scaleY, 0.6);
+
+        elements.gameWrapper.style.transform = `scale(${scale})`;
+    }
+
+    // Drag and drop support
+    let dragging = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    function startDrag(e, elementId, xSliderId, ySliderId) {
+        e.preventDefault();
+        dragging = { elementId, xSliderId, ySliderId };
+        const rect = elements.gameWrapper.getBoundingClientRect();
+        const scale = rect.width / 1080;
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        dragOffset = {
+            x: (clientX - rect.left) / scale - parseInt(document.getElementById(xSliderId).value),
+            y: (clientY - rect.top) / scale - parseInt(document.getElementById(ySliderId).value)
+        };
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const rect = elements.gameWrapper.getBoundingClientRect();
+        const scale = rect.width / 1080;
+        const x = Math.round((e.clientX - rect.left) / scale - dragOffset.x);
+        const y = Math.round((e.clientY - rect.top) / scale - dragOffset.y);
+
+        document.getElementById(dragging.xSliderId).value = Math.max(0, Math.min(1080, x));
+        document.getElementById(dragging.ySliderId).value = Math.max(0, Math.min(1920, y));
+        updatePositions();
+    });
+
+    document.addEventListener('mouseup', () => { dragging = null; });
+
+    // Make elements draggable
+    elements.subZero.addEventListener('mousedown', (e) => startDrag(e, 'sub-zero', 'subzero-x', 'subzero-y'));
+    elements.iceProjectile.addEventListener('mousedown', (e) => startDrag(e, 'ice-projectile', 'ice-x', 'ice-y'));
+    elements.iceTarget.addEventListener('mousedown', (e) => startDrag(e, 'ice-target', 'target-x', 'target-y'));
+    elements.beatIndicator.addEventListener('mousedown', (e) => startDrag(e, 'beat-indicator', 'indicator-x', 'indicator-y'));
+
+    // Initialize
+    window.addEventListener('resize', updateScale);
+    updateScale();
+    updatePositions();
+    loadFrames();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kombat Ice</title>
+    <style>
+        @font-face {
+            font-family: 'MortalKombat';
+            src: url('assets/Font/MK4.TTF') format('truetype');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            touch-action: none;
+            font-family: 'MortalKombat', 'Arial Black', sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 1080px;
+            height: 1920px;
+            transform-origin: center center;
+            overflow: hidden;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #1a0a2e 0%, #0d0015 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #loading-screen h1 {
+            color: #ff2222;
+            font-size: 80px;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #aa0000, 0 0 60px #660000;
+            margin-bottom: 40px;
+            letter-spacing: 8px;
+        }
+
+        #loading-subzero {
+            width: 350px;
+            height: auto;
+            image-rendering: pixelated;
+            margin-bottom: 40px;
+        }
+
+        #loading-bar-container {
+            width: 600px;
+            height: 30px;
+            background: #222;
+            border: 3px solid #ff2222;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        #loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff2222, #ff6600);
+            transition: width 0.1s ease;
+        }
+
+        #loading-text {
+            color: #888;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        #start-btn {
+            display: none;
+            margin-top: 40px;
+            padding: 20px 80px;
+            font-family: 'MortalKombat', 'Arial Black', sans-serif;
+            font-size: 48px;
+            color: #ff2222;
+            background: transparent;
+            border: 4px solid #ff2222;
+            border-radius: 10px;
+            cursor: pointer;
+            text-shadow: 0 0 10px #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        #start-btn:hover {
+            background: rgba(255, 34, 34, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Intro Video */
+        #intro-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 50;
+            display: none;
+        }
+
+        /* Game Elements */
+        #level-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        #agent {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: auto;
+            display: none;
+            image-rendering: pixelated;
+            z-index: 10;
+        }
+
+        #sub-zero {
+            position: absolute;
+            left: 200px;
+            top: 1400px;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: auto;
+            display: none;
+            image-rendering: pixelated;
+        }
+
+        #ice-projectile {
+            position: absolute;
+            width: 120px;
+            height: auto;
+            display: none;
+            image-rendering: pixelated;
+            z-index: 5;
+        }
+
+        /* Beat Indicator */
+        #beat-indicator {
+            position: absolute;
+            left: 535px;
+            top: 1746px;
+            transform: translate(-50%, -50%);
+            width: 297px;
+            height: 297px;
+            display: none;
+            z-index: 50;
+        }
+
+        /* UI Elements */
+        #timing-label {
+            position: absolute;
+            top: 400px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 140px;
+            color: gold;
+            text-shadow: 0 0 30px currentColor, 0 0 60px currentColor;
+            opacity: 0;
+            transition: opacity 0.1s;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        #score-label {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            color: white;
+            text-shadow: 2px 2px 4px #000;
+            display: none;
+            z-index: 20;
+        }
+
+        /* End Panel */
+        #end-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 4px solid #00d4ff;
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            display: none;
+            z-index: 80;
+        }
+
+        #end-panel h1 {
+            color: #ff4444;
+            font-size: 72px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
+        #end-panel .stats {
+            color: white;
+            font-size: 36px;
+            line-height: 1.8;
+        }
+
+        #end-panel .stats .perfect { color: gold; }
+        #end-panel .stats .good { color: #00ff00; }
+        #end-panel .stats .ok { color: #00d4ff; }
+        #end-panel .stats .miss { color: #ff4444; }
+
+        #end-panel .restart {
+            color: #888;
+            font-size: 28px;
+            margin-top: 40px;
+        }
+
+        /* Skip hint */
+        #skip-hint {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 28px;
+            z-index: 60;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="game-wrapper">
+            <!-- Loading Screen -->
+            <div id="loading-screen">
+                <h1>KOMBAT ICE</h1>
+                <img id="loading-subzero" src="assets/idle/idle0.png" alt="Sub-Zero">
+                <div id="loading-bar-container">
+                    <div id="loading-bar"></div>
+                </div>
+                <div id="loading-text">Loading assets...</div>
+                <button id="start-btn">START</button>
+            </div>
+
+            <!-- Intro Video -->
+            <video id="intro-video" playsinline></video>
+            <div id="skip-hint">TAP OR PRESS SPACE TO SKIP</div>
+
+            <!-- Game Layer -->
+            <img id="level-background" src="" alt="">
+            <img id="agent" src="" alt="">
+            <img id="sub-zero" src="" alt="">
+            <img id="ice-projectile" src="" alt="">
+            <canvas id="beat-indicator"></canvas>
+
+            <!-- UI Layer -->
+            <div id="timing-label"></div>
+            <div id="score-label"></div>
+
+            <!-- End Panel -->
+            <div id="end-panel">
+                <h1>FINISH HIM!</h1>
+                <div class="stats" id="end-stats"></div>
+                <div class="restart">PRESS SPACE TO PLAY AGAIN</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ===== GAME CONFIGURATION =====
+    const CONFIG = {
+        BPM: 144,
+        BEATS_PER_CYCLE: 8,
+        TARGET_BEAT: 5,  // Which beat in cycle to hit (1-8)
+        FIRST_BEAT_OFFSET: 0,  // Time from audio start to beat 1
+        GAME_END_TIME: 95.0,
+
+        // Timing windows (in beats)
+        PERFECT_WINDOW: 0.15,  // ~62ms at 144 BPM
+        GOOD_WINDOW: 0.3,      // ~125ms
+        OK_WINDOW: 0.5,        // ~208ms
+
+        // Animation
+        AGENT_FPS: 30,
+        IDLE_FPS: 12,
+        ICE_FPS: 15,
+        SPECIAL_FPS: 10,
+
+        // Asset counts
+        LEVEL_COUNT: 24,
+        AGENT_FRAME_START: 108958,
+        AGENT_FRAME_COUNT: 100,
+        IDLE_FRAME_COUNT: 12,  // 0-9, 11 (no 10)
+        ICE_FRAME_COUNT: 6,
+        SPECIAL_FRAME_COUNT: 3,
+
+        // Positions
+        SUBZERO_POS: { x: 200, y: 1400 },
+        ICE_TARGET_POS: { x: 745, y: 1750 },
+        ICE_ROTATION: 90,
+        ICE_SCALE: 0.9,
+        BEAT_INDICATOR_SIZE: 297,
+        AGENT_BOTTOM: 0,
+        AGENT_WIDTH: 1172,
+
+        // Intro special trigger
+        INTRO_SPECIAL_TIME: 1.47
+    };
+
+    // ===== GAME STATE =====
+    const state = {
+        phase: 'loading',  // loading, intro, playing, ended
+        score: 0,
+        perfect: 0,
+        good: 0,
+        ok: 0,
+        miss: 0,
+        currentBeat: -1,
+        currentCycle: -1,
+        currentLevel: 0,
+        hasShotThisCycle: false,
+        introSpecialTriggered: false,
+        gameStartTime: 0,
+
+        // Animation states
+        subZeroAnim: 'idle',
+        subZeroFrame: 0,
+        agentFrame: 0,
+        iceFrame: 0,
+        iceVisible: false,
+        icePosition: { x: 0, y: 0 },
+        iceTweenStart: 0,
+        iceTweenDuration: 0.1
+    };
+
+    // ===== ASSETS =====
+    const assets = {
+        music: null,
+        video: null,
+        levels: [],
+        agent: [],
+        idle: [],
+        ice: [],
+        special: []
+    };
+
+    // ===== DOM ELEMENTS =====
+    let elements = {};
+
+    // ===== AUDIO CONTEXT =====
+    let audioContext = null;
+    let audioSource = null;
+    let audioStartTime = 0;
+    let decodedAudioBuffer = null;  // Pre-decoded audio
+
+    // ===== HELPER FUNCTIONS =====
+    function getSecondsPerBeat() {
+        return 60.0 / CONFIG.BPM;
+    }
+
+    function getCurrentAudioTime() {
+        if (!audioContext || state.phase !== 'playing') return 0;
+        return audioContext.currentTime - audioStartTime;
+    }
+
+    // ===== ASSET LOADING =====
+    async function loadAssets() {
+        const loadingBar = document.getElementById('loading-bar');
+        const loadingText = document.getElementById('loading-text');
+
+        let loaded = 0;
+        const totalAssets = 1 + 1 + CONFIG.LEVEL_COUNT + CONFIG.AGENT_FRAME_COUNT +
+                          CONFIG.IDLE_FRAME_COUNT + CONFIG.ICE_FRAME_COUNT + CONFIG.SPECIAL_FRAME_COUNT;
+
+        function updateProgress() {
+            loaded++;
+            const percent = (loaded / totalAssets) * 100;
+            loadingBar.style.width = percent + '%';
+        }
+
+        // Load and pre-decode music
+        loadingText.textContent = 'Loading music...';
+        const musicData = await loadAudio('assets/KombatIce.mp3');
+
+        // Create audio context and pre-decode for instant playback later
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        decodedAudioBuffer = await audioContext.decodeAudioData(musicData);
+        updateProgress();
+
+        // Load video
+        loadingText.textContent = 'Loading video...';
+        assets.video = document.getElementById('intro-video');
+        assets.video.src = 'assets/intro-video.mp4';
+        await new Promise((resolve, reject) => {
+            assets.video.oncanplaythrough = () => {
+                console.log('Video loaded successfully');
+                resolve();
+            };
+            assets.video.onerror = (e) => {
+                console.error('Video load error:', assets.video.error);
+                resolve(); // Continue anyway
+            };
+            assets.video.load();
+        });
+        updateProgress();
+
+        // Load levels
+        loadingText.textContent = 'Loading levels...';
+        for (let i = 1; i <= CONFIG.LEVEL_COUNT; i++) {
+            assets.levels.push(await loadImage(`assets/levels/level${i}.jpeg`));
+            updateProgress();
+        }
+
+        // Load agent frames
+        loadingText.textContent = 'Loading agent...';
+        for (let i = 0; i < CONFIG.AGENT_FRAME_COUNT; i++) {
+            const frameNum = CONFIG.AGENT_FRAME_START + i;
+            const paddedNum = String(frameNum).padStart(8, '0');
+            assets.agent.push(await loadImage(`assets/agent/agent_${paddedNum}.png`));
+            updateProgress();
+        }
+
+        // Load idle frames (0-9, 11 - skip 10)
+        loadingText.textContent = 'Loading Sub-Zero...';
+        const idleFrameNumbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11];
+        for (const num of idleFrameNumbers) {
+            assets.idle.push(await loadImage(`assets/idle/idle${num}.png`));
+            updateProgress();
+        }
+        // Add one more to make 12
+        assets.idle.push(assets.idle[0]);
+        updateProgress();
+
+        // Load ice frames
+        loadingText.textContent = 'Loading ice...';
+        for (let i = 1; i <= CONFIG.ICE_FRAME_COUNT; i++) {
+            assets.ice.push(await loadImage(`assets/ice/ice${i}.png`));
+            updateProgress();
+        }
+
+        // Load special frames
+        loadingText.textContent = 'Loading special...';
+        for (let i = 0; i < CONFIG.SPECIAL_FRAME_COUNT; i++) {
+            assets.special.push(await loadImage(`assets/special/ice_special${i}.png`));
+            updateProgress();
+        }
+
+        loadingText.textContent = 'Ready!';
+
+        // Hide loading bar, show START button
+        document.getElementById('loading-bar-container').style.display = 'none';
+        document.getElementById('loading-text').style.display = 'none';
+        document.getElementById('start-btn').style.display = 'block';
+    }
+
+    function loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+
+    async function loadAudio(src) {
+        const response = await fetch(src);
+        const arrayBuffer = await response.arrayBuffer();
+        return arrayBuffer;
+    }
+
+    // ===== GAME PHASES =====
+    function startIntro() {
+        state.phase = 'intro';
+        state.introSpecialTriggered = false;
+
+        elements.loadingScreen.style.display = 'none';
+        elements.introVideo.style.display = 'block';
+        elements.skipHint.style.display = 'block';
+        elements.subZero.style.display = 'block';
+        elements.subZero.style.transform = 'translate(-50%, -50%) scale(0.7)';
+
+        // Start video
+        elements.introVideo.currentTime = 0;
+
+        // Handle play promise (required for modern browsers)
+        const playPromise = elements.introVideo.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.error('Video play failed:', error);
+                // If video fails to play, skip to gameplay
+                startGameplay();
+            });
+        }
+
+        elements.introVideo.onended = () => {
+            startGameplay();
+        };
+    }
+
+    async function startGameplay() {
+        state.phase = 'playing';
+        state.score = 0;
+        state.perfect = 0;
+        state.good = 0;
+        state.ok = 0;
+        state.miss = 0;
+        state.currentBeat = -1;
+        state.currentCycle = -1;
+        state.currentLevel = 0;
+        state.hasShotThisCycle = false;
+
+        // Hide intro, show game
+        elements.introVideo.style.display = 'none';
+        elements.introVideo.pause();
+        elements.skipHint.style.display = 'none';
+
+        elements.levelBackground.style.display = 'block';
+        elements.levelBackground.src = assets.levels[0].src;
+
+        elements.agent.style.display = 'block';
+        elements.agent.style.bottom = CONFIG.AGENT_BOTTOM + 'px';
+        elements.agent.style.width = CONFIG.AGENT_WIDTH + 'px';
+        elements.subZero.style.display = 'block';
+        elements.subZero.style.transform = 'translate(-50%, -50%) scale(1.6)';
+        elements.subZero.style.left = CONFIG.SUBZERO_POS.x + 'px';
+        elements.subZero.style.top = CONFIG.SUBZERO_POS.y + 'px';
+
+        elements.beatIndicator.style.display = 'block';
+        elements.scoreLabel.style.display = 'block';
+
+        // Reset animations
+        state.subZeroAnim = 'idle';
+        state.subZeroFrame = 0;
+        state.agentFrame = 0;
+        state.iceVisible = false;
+        elements.iceProjectile.style.display = 'none';
+
+        // Start audio with Web Audio API
+        await startAudio();
+    }
+
+    async function startAudio() {
+        // Resume audio context if suspended (required after user interaction)
+        if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+        }
+
+        // Use pre-decoded buffer for instant playback
+        audioSource = audioContext.createBufferSource();
+        audioSource.buffer = decodedAudioBuffer;
+        audioSource.connect(audioContext.destination);
+
+        audioStartTime = audioContext.currentTime;
+        state.gameStartTime = audioStartTime;
+        audioSource.start(0);
+
+        audioSource.onended = () => {
+            if (state.phase === 'playing') {
+                showEndScreen();
+            }
+        };
+    }
+
+    function showEndScreen() {
+        state.phase = 'ended';
+
+        elements.beatIndicator.style.display = 'none';
+        elements.iceProjectile.style.display = 'none';
+
+        const total = state.perfect + state.good + state.ok + state.miss;
+        const accuracy = total > 0 ? Math.round((state.perfect + state.good) / total * 100) : 0;
+
+        elements.endStats.innerHTML = `
+            <div>SCORE: ${state.score}</div>
+            <br>
+            <div class="perfect">PERFECT: ${state.perfect}</div>
+            <div class="good">GOOD: ${state.good}</div>
+            <div class="ok">OK: ${state.ok}</div>
+            <div class="miss">MISS: ${state.miss}</div>
+            <br>
+            <div>ACCURACY: ${accuracy}%</div>
+        `;
+
+        elements.endPanel.style.display = 'block';
+    }
+
+    function resetGame() {
+        elements.endPanel.style.display = 'none';
+        startIntro();
+    }
+
+    // ===== INPUT HANDLING =====
+    function handleInput() {
+        if (state.phase === 'intro') {
+            elements.introVideo.pause();
+            startGameplay();
+        } else if (state.phase === 'playing' && !state.hasShotThisCycle) {
+            shootIce();
+        } else if (state.phase === 'ended') {
+            resetGame();
+        }
+    }
+
+    function shootIce() {
+        state.hasShotThisCycle = true;
+
+        // Calculate timing
+        const gameTime = getCurrentAudioTime();
+        const adjustedTime = gameTime - CONFIG.FIRST_BEAT_OFFSET;
+        const beatFloat = adjustedTime / getSecondsPerBeat();
+
+        // Check timing result
+        const result = checkTiming(beatFloat);
+        showTimingFeedback(result);
+
+        // Trigger attack animation
+        state.subZeroAnim = 'attack';
+        state.subZeroFrame = 0;
+
+        // Fire projectile
+        fireProjectile();
+    }
+
+    function checkTiming(currentBeatFloat) {
+        const targetBeatOffset = CONFIG.TARGET_BEAT - 1;
+        let cyclePosition = (currentBeatFloat - targetBeatOffset) % CONFIG.BEATS_PER_CYCLE;
+        if (cyclePosition < 0) cyclePosition += CONFIG.BEATS_PER_CYCLE;
+
+        const diff = Math.min(cyclePosition, CONFIG.BEATS_PER_CYCLE - cyclePosition);
+
+        if (diff <= CONFIG.PERFECT_WINDOW) {
+            state.score += 100;
+            state.perfect++;
+            return 'perfect';
+        } else if (diff <= CONFIG.GOOD_WINDOW) {
+            state.score += 50;
+            state.good++;
+            return 'good';
+        } else if (diff <= CONFIG.OK_WINDOW) {
+            state.score += 25;
+            state.ok++;
+            return 'ok';
+        } else {
+            state.miss++;
+            return 'miss';
+        }
+    }
+
+    function showTimingFeedback(result) {
+        const messages = {
+            perfect: ['PERFECT!', 'FLAWLESS!', 'TOASTY!', 'EXCELLENT!'],
+            good: ['GOOD!', 'NICE!', 'SOLID!', 'WELL DONE!'],
+            ok: ['OK', 'ALMOST!', 'CLOSE!', 'NOT BAD'],
+            miss: ['MISS', 'TOO SLOW!', 'TRY AGAIN!', 'NOPE!']
+        };
+
+        const colors = {
+            perfect: 'gold',
+            good: '#00ff00',
+            ok: '#00d4ff',
+            miss: '#ff4444'
+        };
+
+        const label = elements.timingLabel;
+        const msgArray = messages[result];
+        label.textContent = msgArray[Math.floor(Math.random() * msgArray.length)];
+        label.style.color = colors[result];
+        label.style.opacity = 1;
+
+        // Fade out (longer display time)
+        setTimeout(() => {
+            label.style.transition = 'opacity 0.8s';
+            label.style.opacity = 0;
+        }, 400);
+
+        // Reset transition
+        setTimeout(() => {
+            label.style.transition = 'opacity 0.1s';
+        }, 1200);
+
+        // Camera shake for ok/miss
+        if (result === 'ok' || result === 'miss') {
+            shakeCamera(result === 'miss' ? 15 : 5);
+        }
+    }
+
+    function fireProjectile() {
+        state.iceVisible = true;
+        state.iceFrame = 0;
+        state.icePosition = {
+            x: CONFIG.SUBZERO_POS.x + 50,
+            y: CONFIG.SUBZERO_POS.y - 50
+        };
+        state.iceTweenStart = getCurrentAudioTime();
+
+        elements.iceProjectile.style.display = 'block';
+    }
+
+    let shakeAmount = 0;
+    let currentScale = 1;
+    function shakeCamera(amount) {
+        shakeAmount = amount;
+    }
+
+    // ===== GAME LOOP =====
+    let lastFrameTime = 0;
+    let animAccumulators = {
+        agent: 0,
+        idle: 0,
+        ice: 0,
+        special: 0
+    };
+
+    function gameLoop(timestamp) {
+        const deltaTime = (timestamp - lastFrameTime) / 1000;
+        lastFrameTime = timestamp;
+
+        if (state.phase === 'intro') {
+            updateIntro();
+        } else if (state.phase === 'playing') {
+            updateGameplay(deltaTime);
+        }
+
+        // Apply camera shake (preserve scale)
+        if (shakeAmount > 0.1) {
+            const offsetX = (Math.random() - 0.5) * shakeAmount * 2;
+            const offsetY = (Math.random() - 0.5) * shakeAmount * 2;
+            elements.gameWrapper.style.transform = `scale(${currentScale}) translate(${offsetX}px, ${offsetY}px)`;
+            shakeAmount *= 0.9;
+        } else if (shakeAmount > 0) {
+            shakeAmount = 0;
+            elements.gameWrapper.style.transform = `scale(${currentScale})`;
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function updateIntro() {
+        // Check for special trigger
+        if (!state.introSpecialTriggered && elements.introVideo.currentTime >= CONFIG.INTRO_SPECIAL_TIME) {
+            state.introSpecialTriggered = true;
+            state.subZeroAnim = 'attack';
+            state.subZeroFrame = 0;
+        }
+
+        updateSubZeroAnimation(1/60);
+    }
+
+    function updateGameplay(deltaTime) {
+        const gameTime = getCurrentAudioTime();
+
+        // Check game end
+        if (gameTime >= CONFIG.GAME_END_TIME) {
+            showEndScreen();
+            return;
+        }
+
+        // Calculate beats
+        const adjustedTime = gameTime - CONFIG.FIRST_BEAT_OFFSET;
+        if (adjustedTime < 0) return;
+
+        const beatFloat = adjustedTime / getSecondsPerBeat();
+        const newBeat = Math.floor(beatFloat);
+        const beatInCycle = (newBeat % CONFIG.BEATS_PER_CYCLE) + 1;
+        const newCycle = Math.floor(newBeat / CONFIG.BEATS_PER_CYCLE);
+
+        // Beat change
+        if (newBeat !== state.currentBeat) {
+            state.currentBeat = newBeat;
+            onBeat(beatInCycle);
+        }
+
+        // Cycle change
+        if (newCycle !== state.currentCycle) {
+            state.currentCycle = newCycle;
+            state.hasShotThisCycle = false;
+            onNewCycle(newCycle);
+        }
+
+        // Update beat indicator
+        updateBeatIndicator(beatFloat);
+
+        // Update animations
+        updateAgentAnimation(deltaTime);
+        updateSubZeroAnimation(deltaTime);
+        updateIceProjectile(gameTime);
+
+        // Update score display
+        elements.scoreLabel.textContent = `Score: ${state.score}`;
+    }
+
+    function onBeat(beatInCycle) {
+        // Pulse beat indicator
+        pulseBeatIndicator();
+    }
+
+    function onNewCycle(cycle) {
+        // Hide ice projectile
+        state.iceVisible = false;
+        elements.iceProjectile.style.display = 'none';
+
+        // Change level
+        state.currentLevel = cycle % CONFIG.LEVEL_COUNT;
+        elements.levelBackground.src = assets.levels[state.currentLevel].src;
+    }
+
+    // ===== ANIMATIONS =====
+    function updateAgentAnimation(deltaTime) {
+        animAccumulators.agent += deltaTime;
+        const frameTime = 1 / CONFIG.AGENT_FPS;
+
+        while (animAccumulators.agent >= frameTime) {
+            animAccumulators.agent -= frameTime;
+            state.agentFrame = (state.agentFrame + 1) % CONFIG.AGENT_FRAME_COUNT;
+        }
+
+        elements.agent.src = assets.agent[state.agentFrame].src;
+    }
+
+    function updateSubZeroAnimation(deltaTime) {
+        if (state.subZeroAnim === 'idle') {
+            animAccumulators.idle += deltaTime;
+            const frameTime = 1 / CONFIG.IDLE_FPS;
+
+            while (animAccumulators.idle >= frameTime) {
+                animAccumulators.idle -= frameTime;
+                state.subZeroFrame = (state.subZeroFrame + 1) % assets.idle.length;
+            }
+
+            elements.subZero.src = assets.idle[state.subZeroFrame].src;
+        } else if (state.subZeroAnim === 'attack') {
+            animAccumulators.special += deltaTime;
+            const frameTime = 1 / CONFIG.SPECIAL_FPS;
+
+            while (animAccumulators.special >= frameTime) {
+                animAccumulators.special -= frameTime;
+                state.subZeroFrame++;
+
+                if (state.subZeroFrame >= CONFIG.SPECIAL_FRAME_COUNT) {
+                    state.subZeroAnim = 'idle';
+                    state.subZeroFrame = 0;
+                    animAccumulators.idle = 0;
+                    return;
+                }
+            }
+
+            elements.subZero.src = assets.special[state.subZeroFrame].src;
+        }
+    }
+
+    function updateIceProjectile(gameTime) {
+        if (!state.iceVisible) return;
+
+        // Tween position
+        const elapsed = gameTime - state.iceTweenStart;
+        const progress = Math.min(elapsed / state.iceTweenDuration, 1);
+
+        // Only animate ice sprite while traveling, freeze on last frame when arrived
+        if (progress < 1) {
+            animAccumulators.ice += 1/60;
+            const frameTime = 1 / CONFIG.ICE_FPS;
+            while (animAccumulators.ice >= frameTime) {
+                animAccumulators.ice -= frameTime;
+                state.iceFrame = Math.min(state.iceFrame + 1, CONFIG.ICE_FRAME_COUNT - 1);
+            }
+        } else {
+            // Arrived at target - show final frame
+            state.iceFrame = CONFIG.ICE_FRAME_COUNT - 1;
+        }
+        elements.iceProjectile.src = assets.ice[state.iceFrame].src;
+
+        const startX = CONFIG.SUBZERO_POS.x + 50;
+        const startY = CONFIG.SUBZERO_POS.y - 50;
+        const endX = CONFIG.ICE_TARGET_POS.x;
+        const endY = CONFIG.ICE_TARGET_POS.y;
+
+        const x = startX + (endX - startX) * progress;
+        const y = startY + (endY - startY) * progress;
+
+        elements.iceProjectile.style.left = x + 'px';
+        elements.iceProjectile.style.top = y + 'px';
+        elements.iceProjectile.style.width = (120 * CONFIG.ICE_SCALE) + 'px';
+        elements.iceProjectile.style.transform = `translate(-50%, -50%) rotate(${CONFIG.ICE_ROTATION}deg)`;
+    }
+
+    // ===== BEAT INDICATOR =====
+    let beatIndicatorCtx = null;
+    let pulseScale = 1;
+
+    function initBeatIndicator() {
+        const canvas = elements.beatIndicator;
+        canvas.width = CONFIG.BEAT_INDICATOR_SIZE;
+        canvas.height = CONFIG.BEAT_INDICATOR_SIZE;
+        beatIndicatorCtx = canvas.getContext('2d');
+    }
+
+    function updateBeatIndicator(beatFloat) {
+        if (!beatIndicatorCtx) return;
+
+        const ctx = beatIndicatorCtx;
+        const size = CONFIG.BEAT_INDICATOR_SIZE;
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const innerRadius = size * 0.17;
+        const outerRadiusMax = size * 0.42;
+
+        // Calculate ring progress
+        const beatInCycleFloat = beatFloat % CONFIG.BEATS_PER_CYCLE;
+        const targetBeat0Index = CONFIG.TARGET_BEAT - 1;
+
+        let progress;
+        if (beatInCycleFloat <= targetBeat0Index) {
+            progress = beatInCycleFloat / targetBeat0Index;
+        } else {
+            progress = 1.0;
+        }
+
+        const currentOuterRadius = outerRadiusMax - (outerRadiusMax - innerRadius) * progress;
+
+        // Clear
+        ctx.clearRect(0, 0, size, size);
+
+        // Draw inner circle with pulse
+        const pulsedRadius = innerRadius * pulseScale;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, pulsedRadius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(50, 150, 255, 0.9)';
+        ctx.fill();
+
+        // Draw outer ring
+        const proximity = 1 - Math.abs(currentOuterRadius - innerRadius) / (outerRadiusMax - innerRadius);
+        const ringColor = lerpColor([255, 255, 255], [255, 215, 0], proximity * proximity);
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, currentOuterRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${ringColor[0]}, ${ringColor[1]}, ${ringColor[2]}, 0.8)`;
+        ctx.lineWidth = 6;
+        ctx.stroke();
+
+        // Decay pulse
+        if (pulseScale > 1.01) {
+            pulseScale = 1 + (pulseScale - 1) * 0.85;
+        } else {
+            pulseScale = 1;
+        }
+    }
+
+    function pulseBeatIndicator() {
+        pulseScale = 1.25;
+    }
+
+    function lerpColor(c1, c2, t) {
+        return [
+            Math.round(c1[0] + (c2[0] - c1[0]) * t),
+            Math.round(c1[1] + (c2[1] - c1[1]) * t),
+            Math.round(c1[2] + (c2[2] - c1[2]) * t)
+        ];
+    }
+
+    // ===== SCALING =====
+    function updateScale() {
+        const container = document.getElementById('game-container');
+        const wrapper = document.getElementById('game-wrapper');
+
+        const scaleX = window.innerWidth / 1080;
+        const scaleY = window.innerHeight / 1920;
+        currentScale = Math.min(scaleX, scaleY);
+
+        wrapper.style.transform = `scale(${currentScale})`;
+    }
+
+    // ===== INITIALIZATION =====
+    async function init() {
+        // Get DOM elements
+        elements = {
+            loadingScreen: document.getElementById('loading-screen'),
+            loadingBar: document.getElementById('loading-bar'),
+            introVideo: document.getElementById('intro-video'),
+            skipHint: document.getElementById('skip-hint'),
+            levelBackground: document.getElementById('level-background'),
+            agent: document.getElementById('agent'),
+            subZero: document.getElementById('sub-zero'),
+            iceProjectile: document.getElementById('ice-projectile'),
+            beatIndicator: document.getElementById('beat-indicator'),
+            timingLabel: document.getElementById('timing-label'),
+            scoreLabel: document.getElementById('score-label'),
+            endPanel: document.getElementById('end-panel'),
+            endStats: document.getElementById('end-stats'),
+            gameWrapper: document.getElementById('game-wrapper')
+        };
+
+        // Set up scaling
+        updateScale();
+        window.addEventListener('resize', updateScale);
+
+        // Set up input handlers
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                handleInput();
+            }
+        });
+
+        document.addEventListener('click', handleInput);
+        document.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleInput();
+        });
+
+        // Initialize beat indicator canvas
+        initBeatIndicator();
+
+        // Start loading screen Sub-Zero animation
+        const loadingSubzero = document.getElementById('loading-subzero');
+        let loadingIdleFrame = 0;
+        const idleNums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11];
+        const loadingIdleInterval = setInterval(() => {
+            loadingIdleFrame = (loadingIdleFrame + 1) % idleNums.length;
+            loadingSubzero.src = `assets/idle/idle${idleNums[loadingIdleFrame]}.png`;
+        }, 1000 / 12);
+
+        // Load assets
+        await loadAssets();
+
+        // Wait for START button click
+        const startBtn = document.getElementById('start-btn');
+        await new Promise(resolve => {
+            startBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent click from bubbling to document
+                resolve();
+            }, { once: true });
+        });
+
+        // Stop loading screen animation
+        clearInterval(loadingIdleInterval);
+
+        // Start game loop
+        requestAnimationFrame(gameLoop);
+
+        // Start intro video
+        startIntro();
+    }
+
+    // Start when page loads
+    window.addEventListener('load', init);
+    </script>
+</body>
+</html>
