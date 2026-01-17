@@ -35,17 +35,17 @@
             height: 100%;
             min-height: 100vh;
             min-height: -webkit-fill-available;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             background: #000;
+            overflow: hidden;
         }
 
         #game-wrapper {
-            position: relative;
+            position: absolute;
+            top: 50%;
+            left: 50%;
             width: 1080px;
             height: 1920px;
-            transform-origin: center center;
+            transform-origin: top left;
             overflow: hidden;
         }
 
@@ -739,6 +739,17 @@
 
     let shakeAmount = 0;
     let currentScale = 1;
+    let viewportWidth = 1080;
+    let viewportHeight = 1920;
+
+    function getBaseTransform() {
+        const scaledWidth = 1080 * currentScale;
+        const scaledHeight = 1920 * currentScale;
+        const offsetX = (viewportWidth - scaledWidth) / 2;
+        const offsetY = (viewportHeight - scaledHeight) / 2;
+        return `translate(${offsetX - viewportWidth/2}px, ${offsetY - viewportHeight/2}px) scale(${currentScale})`;
+    }
+
     function shakeCamera(amount) {
         shakeAmount = amount;
     }
@@ -762,15 +773,15 @@
             updateGameplay(deltaTime);
         }
 
-        // Apply camera shake (preserve scale)
+        // Apply camera shake (preserve scale and position)
         if (shakeAmount > 0.1) {
-            const offsetX = (Math.random() - 0.5) * shakeAmount * 2;
-            const offsetY = (Math.random() - 0.5) * shakeAmount * 2;
-            elements.gameWrapper.style.transform = `scale(${currentScale}) translate(${offsetX}px, ${offsetY}px)`;
+            const shakeX = (Math.random() - 0.5) * shakeAmount * 2;
+            const shakeY = (Math.random() - 0.5) * shakeAmount * 2;
+            elements.gameWrapper.style.transform = getBaseTransform() + ` translate(${shakeX}px, ${shakeY}px)`;
             shakeAmount *= 0.9;
         } else if (shakeAmount > 0) {
             shakeAmount = 0;
-            elements.gameWrapper.style.transform = `scale(${currentScale})`;
+            elements.gameWrapper.style.transform = getBaseTransform();
         }
 
         requestAnimationFrame(gameLoop);
@@ -1026,8 +1037,10 @@
         const scaleX = width / 1080;
         const scaleY = height / 1920;
         currentScale = Math.min(scaleX, scaleY);
+        viewportWidth = width;
+        viewportHeight = height;
 
-        wrapper.style.transform = `scale(${currentScale})`;
+        wrapper.style.transform = getBaseTransform();
 
         // Debug logging (can remove later)
         console.log('Viewport:', width, 'x', height, 'Scale:', currentScale);
